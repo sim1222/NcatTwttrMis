@@ -1,4 +1,5 @@
 import datetime
+from email.header import Header
 import tweepy
 import requests
 import json
@@ -11,6 +12,8 @@ consumer_key = CONFIG["CONSUMER_KEY"]
 consumer_secret = CONFIG["CONSUMER_SECRET"]
 access_token = CONFIG["ACCESS_TOKEN"]
 access_token_secret = CONFIG["ACCESS_SECRET"]
+isDiscord = CONFIG["isDiscord"]
+DiscordWebhook = CONFIG["DiscordWebhook"]
 
 
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
@@ -30,6 +33,7 @@ last_tw_id: int = 1
 #nullnyat
 user_id = 1451961024257540096
 
+isFirst = True
 
 def gettw():
     #for tweet in public_tweets:
@@ -51,17 +55,32 @@ def gettw():
             print("Posted Time: " + str(tweet.created_at))
             print(tweet.text)
             print()
+
+            global isFirst
+            if isFirst == True:
+                print("Its first get.")
+                isFirst = False
+                break
+
+            postNakami = "ID: " + str(tweet.id) + "\n" \
+                        + "Name: " + tweet.user.name.translate(str.maketrans({'@': '＠', '#': '＃'})) + "\n"\
+                        + "Time: " + str(tweet.created_at) + "\n"\
+                        + tweet.text.translate(str.maketrans({'@': '＠', '#': '＃'})) + "\n"\
+                        + "https://twitter.com/" + str(tweet.user.screen_name) + "/status/" + str(tweet.id)
+
             if tweet.id > last_tw_id:
-                mk.notes_create(
-                    text="ID: " + str(tweet.id) + "\n"
-                        + "Name: " + tweet.user.name.translate(str.maketrans({'@': '＠', '#': '＃'})) + "\n"
-                        + "Time: " + str(tweet.created_at) + "\n"
-                        + "\n"
-                        + tweet.text.translate(str.maketrans({'@': '＠', '#': '＃'})) + "\n"
-                        + "https://twitter.com/" + str(tweet.user.screen_name) + "/status/" + str(tweet.id),
-                    visibility="home",
-                    local_only=True
-                print("noted")
+                if isDiscord == True:
+                    sendData = {"content": postNakami}
+                    sendHead = {"Content-Type": "application/json"}
+                    requests.post(DiscordWebhook, data=json.dumps(sendData), headers=sendHead)
+                    print("posted to discord")
+                else:
+                    mk.notes_create(
+                        text=postNakami,
+                        visibility="home",
+                        local_only=True
+                    )
+                    print("noted")
             else:
                 print("already noted")
             time.sleep(2)

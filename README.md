@@ -6,7 +6,21 @@ TwitterAPI を叩いて、そのアカウントのツイートを 5 分おきに
 
 ## 使い方
 
+main.py を実行してください。  
+systemd などでサービス化すると便利です
+
+次のパッケージが必要です
+
+```
+tweepy
+requests
+misskey.py
+```
+
 config.py
+
+isDiscord が True の場合、Discord に投稿します。  
+False の場合、Misskey に投稿します。
 
 ```
 CONFIG = {
@@ -16,6 +30,8 @@ CONFIG = {
    "ACCESS_SECRET": "afmjsaflkfaawf",
    "MISSKEY_ADDRESS": "https://simkey.net",
    "MISSKEY_API": "afwjwafwafkawf",
+   "isDiscord": False,
+   "DiscordWebhook": "https://discordapp.com/api/webhooks/9999999999999999",
 }
 ```
 
